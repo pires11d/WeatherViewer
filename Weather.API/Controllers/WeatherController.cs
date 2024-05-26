@@ -52,17 +52,22 @@ namespace Weather.API.Controllers
         /// Busca as temperaturas de uma ou mais cidades, em um período de tempo
         /// </summary>
         /// <remarks>
-        /// Insira uma ou mais cidades para consultar, no corpo da requisição:
+        /// Insira uma ou mais cidades para consultar, pelo nome, no corpo da requisição:
         /// <br></br>
-        /// Ex.: Curitiba, Florianópolis, Porto Alegre
+        /// Ex.:<para></para>
+        /// ["Curitiba", "Florianópolis", "Porto Alegre"]
         /// </remarks>
+        /// <param name="cities"></param>
+        /// <param name="startDate">Data inicial<br></br>Ex.: "2024-05-25"</param>
+        /// <param name="endDate">Data final<br></br>Ex.: "2024-05-26"</param>
         /// <returns></returns>
-        [HttpPost("GetHistory")]
-        public IActionResult GetHistory([FromBody] WeatherCommand request)
+        [HttpPost("GetHistory/{startDate}/{endDate}")]
+        public IActionResult GetHistory([FromBody] List<string> cities, string startDate, string endDate)
         {
             try
             {
-                var result = _service.GetHistory(request);
+                var command = new WeatherCommand(cities, startDate, endDate);
+                var result = _service.GetHistory(command);
                 return Ok(result);
             }
             catch (ApplicationException ex)

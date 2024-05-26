@@ -52,6 +52,17 @@ namespace Weather.Lib.Services
             return result;
         }
 
+        public List<WeatherHistoryDto> GetDefaultHistory()
+        {
+            var today = DateOnly.FromDateTime(DateTime.Now);
+
+            var defaultCommand = new WeatherCommand(Cities, today, today);
+
+            var result = GetHistory(defaultCommand);
+
+            return result;
+        }
+
         private List<WeatherDto> GetHistoryFromFiles(string city, DateOnly startDate, DateOnly endDate)
         {
             var result = new List<WeatherDto>();

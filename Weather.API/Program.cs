@@ -10,13 +10,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-//CONFIGURATION
+//CONFIGURATIONS
 OpenWeatherService.ApiUrl = builder.Configuration["OpenWeather:ApiUrl"];
 OpenWeatherService.ApiKey = builder.Configuration["OpenWeather:ApiKey"];
 OpenWeatherService.Units = builder.Configuration["OpenWeather:Units"];
 RequestHelper.ConfigureClient(OpenWeatherService.ApiUrl);
+
 WeatherService.Cities = builder.Configuration["Configs:DefaultCities"]?.Split(",").Select(x => x.Trim()).ToList();
-var jobInterval = builder.Configuration["Configs:JobInterval"] ?? "0 0/2 * * * ?";
+
+var jobInterval = builder.Configuration["Configs:JobInterval"];
+if (!CronExpression.IsValidExpression(jobInterval))
+    jobInterval = "0 0/2 * * * ?";
 
 //SERVICES
 builder.Services.AddScoped<IWeatherService, WeatherService>();
@@ -25,17 +29,15 @@ builder.Services.AddScoped<IOpenWeatherService, OpenWeatherService>();
 //SCHEDULES
 builder.Services.AddQuartz(q =>
 {
-    //q.UseMicrosoftDependencyInjectionScopedJobFactory();
     var jobKey = new JobKey("ScheduledJob");
     q.AddJob<WeatherJob>(opts => opts.WithIdentity(jobKey));
 
     q.AddTrigger(opts => opts
         .ForJob(jobKey)
-        .WithIdentity("Job-trigger")
+        .WithIdentity("ScheduledJob-trigger")
         .WithCronSchedule(jobInterval));
 
 });
-
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 //SWAGGER
@@ -52,7 +54,11 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Weather.API v1");
+    c.RoutePrefix = "swagger";
+});
 
 app.UseHttpsRedirection();
 

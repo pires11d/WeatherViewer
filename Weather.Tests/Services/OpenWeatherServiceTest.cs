@@ -1,9 +1,8 @@
-namespace Weather.Tests
+namespace Weather.Tests.Services
 {
     [TestClass]
-    public class UnitTest
+    public class OpenWeatherServiceTest
     {
-
         [TestInitialize]
         public void Initialize()
         {

@@ -1,4 +1,5 @@
 ﻿using RestSharp;
+using System.Runtime.Serialization;
 using System.Text.Json;
 
 namespace Weather.Lib.Utils
@@ -15,7 +16,7 @@ namespace Weather.Lib.Utils
         public static async Task<R?> SendAsync<T, R>(List<QueryParameter> queryParams, Method method, T command)
         {
             if (_client is null)
-                throw new Exception("O Client não foi encontrado! Revise as configurações da API.");
+                throw new ApplicationException("O Client não foi encontrado! Revise as configurações da API.");
 
             var request = CreateRequest<T>(queryParams, method, command);
 
@@ -23,16 +24,14 @@ namespace Weather.Lib.Utils
 
             if (response.IsSuccessStatusCode)
             {
-                R? result;
                 try
                 {
-                    result = !string.IsNullOrEmpty(response.Content) ? JsonSerializer.Deserialize<R>(response.Content) : default;
+                    return !string.IsNullOrEmpty(response.Content) ? JsonSerializer.Deserialize<R>(response.Content) : default;
                 }
                 catch (Exception ex)
                 {
-                    result = default;
+                    throw new SerializationException($"Ocorreu um erro na desserialização do retorno da API: {ex.Message}");
                 }
-                return result;
             }
 
             throw new HttpRequestException(response.ErrorMessage);
