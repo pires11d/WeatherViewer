@@ -25,6 +25,9 @@ namespace Weather.Lib.Utils
         {
             var result = new List<string>();
             var subFolderPath = Path.Combine(_defaultFolder, folder);
+            if (!Directory.Exists(subFolderPath))
+                return result;
+
             var filePaths = Directory.GetFiles(subFolderPath);
 
             foreach (var filePath in filePaths)
