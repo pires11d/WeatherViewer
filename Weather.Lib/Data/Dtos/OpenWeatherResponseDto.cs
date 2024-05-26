@@ -5,10 +5,10 @@ namespace Weather.Lib.Data.Dtos
     public class OpenWeatherResponseDto
     {
         [JsonPropertyName("coord")]
-        public Coordinates? Coordinates { get; set; }
+        public CoordinatesDto? Coordinates { get; set; }
 
         [JsonPropertyName("main")]
-        public Main? Main { get; set; }
+        public MainDto? Main { get; set; }
 
         [JsonPropertyName("dt")]
         public long DateTime { get; set; }
@@ -17,7 +17,7 @@ namespace Weather.Lib.Data.Dtos
         public string Name { get; set; }
     }
 
-    public class Coordinates
+    public class CoordinatesDto
     {
         [JsonPropertyName("lon")]
         public decimal Longitude { get; set; }
@@ -26,7 +26,7 @@ namespace Weather.Lib.Data.Dtos
         public decimal Latitude { get; set; }
     }
 
-    public class Main
+    public class MainDto
     {
         [JsonPropertyName("temp")]
         public decimal Temperature { get; set; }

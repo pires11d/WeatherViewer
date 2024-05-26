@@ -5,6 +5,7 @@ using Weather.Lib.Jobs;
 using Weather.Lib.Services;
 using Weather.Lib.Services.Interfaces;
 using Weather.Lib.Utils;
+using Weather.Lib.Utils.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,8 @@ if (!CronExpression.IsValidExpression(jobInterval))
 //SERVICES
 builder.Services.AddScoped<IWeatherService, WeatherService>();
 builder.Services.AddScoped<IOpenWeatherService, OpenWeatherService>();
+builder.Services.AddScoped<IRequestHelper, RequestHelper>();
+builder.Services.AddScoped<IFileHelper, FileHelper>();
 
 //SCHEDULES
 builder.Services.AddQuartz(q =>

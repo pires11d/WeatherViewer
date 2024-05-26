@@ -9,8 +9,6 @@ namespace Weather.Lib.Services.Interfaces
 
         List<WeatherHistoryDto> GetHistory(WeatherCommand command);
 
-        List<WeatherHistoryDto> GetDefaultHistory();
-
         Task ProcessSchedule();
     }
 }

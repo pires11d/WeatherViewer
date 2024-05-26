@@ -1,10 +1,12 @@
-﻿namespace Weather.Lib.Utils
+﻿using Weather.Lib.Utils.Interfaces;
+
+namespace Weather.Lib.Utils
 {
-    public static class FileHelper
+    public class FileHelper : IFileHelper
     {
         private static readonly string _defaultFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "history");
 
-        public static void SaveFile(string folder, string file, string[] content)
+        public void SaveFile(string folder, string file, string[] content)
         {
             var subFolderPath = Path.Combine(_defaultFolder, folder);
 
@@ -19,7 +21,7 @@
             File.AppendAllLines(filePath, [entry]);
         }
 
-        public static List<string> GetFiles(string folder, DateOnly startDate, DateOnly endDate)
+        public List<string> GetFiles(string folder, DateOnly startDate, DateOnly endDate)
         {
             var result = new List<string>();
             var subFolderPath = Path.Combine(_defaultFolder, folder);

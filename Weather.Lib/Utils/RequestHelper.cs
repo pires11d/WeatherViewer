@@ -1,10 +1,11 @@
 ﻿using RestSharp;
 using System.Runtime.Serialization;
 using System.Text.Json;
+using Weather.Lib.Utils.Interfaces;
 
 namespace Weather.Lib.Utils
 {
-    public static class RequestHelper
+    public class RequestHelper : IRequestHelper
     {
         private static RestClient? _client { get; set; } = null;
 
@@ -13,7 +14,7 @@ namespace Weather.Lib.Utils
             return _client ?? (_client = new RestClient(baseUrl));
         }
 
-        public static async Task<R?> SendAsync<T, R>(List<QueryParameter> queryParams, Method method, T command)
+        public async Task<R?> SendAsync<T, R>(List<QueryParameter> queryParams, Method method, T command)
         {
             if (_client is null)
                 throw new ApplicationException("O Client não foi encontrado! Revise as configurações da API.");
@@ -56,21 +57,6 @@ namespace Weather.Lib.Utils
             }
 
             return request;
-        }
-
-        public static bool IsAlive(string publicUrl)
-        {
-            try
-            {
-                var request = new RestRequest(publicUrl);
-                request.Method = Method.Get;
-                var response = _client?.Execute<object>(request);
-                return response?.IsSuccessStatusCode ?? false;
-            }
-            catch
-            {
-                return false;
-            }
         }
     }
 }

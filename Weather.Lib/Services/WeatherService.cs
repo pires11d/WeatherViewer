@@ -2,19 +2,30 @@
 using Weather.Lib.Data.Commands;
 using Weather.Lib.Data.Dtos;
 using Weather.Lib.Services.Interfaces;
-using Weather.Lib.Utils;
+using Weather.Lib.Utils.Interfaces;
 
 namespace Weather.Lib.Services
 {
     public class WeatherService : IWeatherService
     {
-        public static List<string> Cities { get; set; }
+        public static List<string> Cities { get; set; } = new List<string>();
 
         private readonly IOpenWeatherService _openWeatherService;
+        private readonly IFileHelper _fileHelper;
 
-        public WeatherService(IOpenWeatherService openWeatherService)
+        public WeatherService(IOpenWeatherService openWeatherService, IFileHelper fileHelper)
         {
             _openWeatherService = openWeatherService;
+            _fileHelper = fileHelper;
+        }
+
+        public Task ProcessSchedule()
+        {
+            var result = GetCurrent();
+
+            SaveCurrent(result);
+
+            return Task.CompletedTask;
         }
 
         public List<WeatherCurrentDto> GetCurrent()
@@ -52,22 +63,11 @@ namespace Weather.Lib.Services
             return result;
         }
 
-        public List<WeatherHistoryDto> GetDefaultHistory()
-        {
-            var today = DateOnly.FromDateTime(DateTime.Now);
-
-            var defaultCommand = new WeatherCommand(Cities, today, today);
-
-            var result = GetHistory(defaultCommand);
-
-            return result;
-        }
-
         private List<WeatherDto> GetHistoryFromFiles(string city, DateOnly startDate, DateOnly endDate)
         {
             var result = new List<WeatherDto>();
 
-            var entries = FileHelper.GetFiles(city, startDate, endDate);
+            var entries = _fileHelper.GetFiles(city, startDate, endDate);
 
             foreach (var entry in entries)
             {
@@ -86,15 +86,6 @@ namespace Weather.Lib.Services
             return result.OrderByDescending(x => x.Time).ToList();
         }
 
-        public Task ProcessSchedule()
-        {
-            var result = GetCurrent();
-
-            SaveCurrent(result);
-
-            return Task.CompletedTask;
-        }
-
         private void SaveCurrent(List<WeatherCurrentDto> results)
         {
             try
@@ -102,10 +93,13 @@ namespace Weather.Lib.Services
                 var now = DateTime.Now;
                 foreach (var result in results)
                 {
-                    var folderName = result.City;
-                    var fileName = now.ToString("yyyy-MM-dd");
-                    var content = new string[] { now.ToString("s"), result.Current.Temperature.ToString("F2", CultureInfo.InvariantCulture) };
-                    FileHelper.SaveFile(folderName, fileName, content);
+                    if (result != null)
+                    {
+                        var folderName = result.City;
+                        var fileName = now.ToString("yyyy-MM-dd");
+                        var content = new string[] { now.ToString("s"), result.Current.Temperature.ToString("F2", CultureInfo.InvariantCulture) };
+                        _fileHelper.SaveFile(folderName, fileName, content);
+                    }
                 }
             }
             catch (Exception ex)

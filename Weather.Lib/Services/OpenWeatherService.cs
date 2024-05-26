@@ -4,14 +4,22 @@ using Weather.Lib.Data.Dtos;
 using Weather.Lib.Data.Enums;
 using Weather.Lib.Services.Interfaces;
 using Weather.Lib.Utils;
+using Weather.Lib.Utils.Interfaces;
 
 namespace Weather.Lib.Services
 {
     public class OpenWeatherService : IOpenWeatherService
     {
+        private readonly IRequestHelper _requestHelper;
+
         public static string ApiUrl { get; set; }
         public static string ApiKey { get; set; }
         public static string? Units {  get; set; }
+
+        public OpenWeatherService(IRequestHelper requestHelper)
+        {
+            _requestHelper = requestHelper;
+        }
 
         public async Task<WeatherCurrentDto> GetCurrentWeatherByName(string cityName)
         {
@@ -22,13 +30,13 @@ namespace Weather.Lib.Services
             if (!string.IsNullOrEmpty(Units))
                 queryParams.Add(GetQueryParameter(QueryTypeEnum.Units, Units));
 
-            var response = await RequestHelper.SendAsync<object, OpenWeatherResponseDto>(queryParams, Method.Get, null);
+            var response = await _requestHelper.SendAsync<object, OpenWeatherResponseDto>(queryParams, Method.Get, null);
             if (response is null)
                 return new WeatherCurrentDto();
 
             return new WeatherCurrentDto()
             {
-                City = cityName,
+                City = response.Name,
                 Current = new WeatherDto()
                 {
                     Time = DateTimeOffset.FromUnixTimeSeconds(response.DateTime).LocalDateTime,
